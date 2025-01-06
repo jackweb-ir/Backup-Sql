@@ -8,8 +8,6 @@ date_default_timezone_set('Asia/Tehran');
 $token_bot = ""; // Your bot token telegram
 $id_channel = "-100111111"; // Telegram channel ID
 
-$_SERVER['SERVER_NAME'] = 'Domain.com'; // your Domain host
-
 $array_database = [
     "Domain.com" =>[
         [
@@ -194,37 +192,39 @@ $datetimedate = date("Y-m-d");
 $timesdate = date("H-i-s");
 
 $time = date("H:i");
+if($time == "00:00"){
 
-if($time == "00:00"){ // At 00:00 AM, the file will be sent to your Telegram channel where the bot is the admin.
+    foreach($array_database as $getDatabase => $key_database) {
 
-    $name_server = $_SERVER['SERVER_NAME'];
-    $arrays = $array_database[$name_server];
-
-    $dirctor = $name_server;
-
-    foreach($arrays as $property){
-
-        $filename_database = "Database-{$property['filename_database']}_{$datetimedate}_{$timesdate}";
-
-        backup_database($property['db_user'],$property['db_pass'],$property['db_name'],$filename_database,$dirctor);
-        
+        $name_server = $getDatabase;
+        $arrays = $array_database[$name_server];
+    
+        $dirctor = $name_server;
+    
+        foreach($arrays as $property){
+    
+            $filename_database = "Database-{$property['filename_database']}_{$datetimedate}_{$timesdate}";
+    
+            backup_database($property['db_user'],$property['db_pass'],$property['db_name'],$filename_database,$dirctor);
+            
+        }
+    
+    
+        $name_zip = "Database-" . $dirctor . '_' . $datetimedate;
+    
+        zipCreate($name_zip,$dirctor,$dirctor);
+    
+    
+        bot('sendDocument', [
+            'chat_id' => $id_channel,
+            'document'=> new CURLFile($dirctor ."/". $name_zip . ".zip"),
+            'caption' => "با موفقیت از دیتابیس {$dirctor} بکاپ گرفته شد ✅\n\n🕚 در تاریخ : {$todaydate} | {$datetimedate} | {$timesdate}\n\n➖➖➖➖➖➖➖➖",
+            'parse_mode'=>"HTML"
+        ]);
+    
+    
+    
+        removeFolder($dirctor);
     }
-
-
-    $name_zip = "Database-" . $dirctor . '_' . $datetimedate;
-
-    zipCreate($name_zip,$dirctor,$dirctor);
-
-
-    bot('sendDocument', [
-        'chat_id' => $id_channel,
-        'document'=> new CURLFile($dirctor ."/". $name_zip . ".zip"),
-        'caption' => "با موفقیت از دیتابیس {$dirctor} بکاپ گرفته شد ✅\n\n🕚 در تاریخ : {$todaydate} | {$datetimedate} | {$timesdate}\n\n➖➖➖➖➖➖➖➖",
-        'parse_mode'=>"HTML"
-    ]);
-
-
-
-    removeFolder($dirctor);
 
 }
